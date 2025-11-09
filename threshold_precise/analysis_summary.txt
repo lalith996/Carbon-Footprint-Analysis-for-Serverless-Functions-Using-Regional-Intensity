@@ -1,0 +1,48 @@
+======================================================================
+PRECISE CI THRESHOLD MAPPING - ANALYSIS SUMMARY
+======================================================================
+
+Experiment: EXP-001
+Date: 2025-11-09 22:09:36
+Duration: 0.0s
+
+----------------------------------------------------------------------
+CROSSOVER POINTS
+----------------------------------------------------------------------
+
+embodied_prioritized:
+  Empirical crossover: 321.9 gCO₂/kWh
+  Theoretical crossover: 215 gCO₂/kWh
+  Difference: 106.9 gCO₂/kWh
+  Relative error: 49.7%
+
+balanced:
+  Empirical crossover: 321.9 gCO₂/kWh
+  Theoretical crossover: 215 gCO₂/kWh
+  Difference: 106.9 gCO₂/kWh
+  Relative error: 49.7%
+
+----------------------------------------------------------------------
+PERFORMANCE BY CI RANGE
+----------------------------------------------------------------------
+
+
+embodied_prioritized:
+  CI=175: -17.16% ***
+  CI=200: -13.26% ***
+  CI=225:  -9.86% ***
+  CI=250:  -6.87% ***
+  CI=275:  -4.22% ***
+  CI=300:  -1.86% ***
+  CI=325:  +0.26% ***
+  CI=350:  +2.18% ***
+
+balanced:
+  CI=175:  -9.80% ***
+  CI=200:  -7.58% ***
+  CI=225:  -5.63% ***
+  CI=250:  -3.93% ***
+  CI=275:  -2.41% ***
+  CI=300:  -1.06% ***
+  CI=325:  +0.15% ***
+  CI=350:  +1.24% ***

@@ -80,8 +80,13 @@ dmypy.json
 # Debug and test scripts (keep validated framework only)
 debug_*.py
 verify_*.py
-test_*.py
+test_ci_sensitivity.py
 *_test.py
+
+# Keep publication experiment scripts
+!precise_threshold_test.py
+!regional_*.py
+!experiment_*.py
 
 # Analysis scripts (keep only essential ones)
 analyze_and_plot.py

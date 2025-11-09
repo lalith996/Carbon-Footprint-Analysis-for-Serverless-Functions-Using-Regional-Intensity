@@ -94,12 +94,8 @@ class PreciseThresholdTester:
                     region = "Northern"
                     server_age = "old"  # Prioritize old servers
                 elif strategy_name == "balanced":
-                    # Use embodied-aware scheduler
-                    region, server_age = choose_region_embodied_aware(
-                        workload_scale=400000,
-                        duration_s=duration_s,
-                        regions=["Northern"]  # Single region test
-                    )
+                    region = "Northern"
+                    server_age = "medium"  # Balanced age
                 else:
                     raise ValueError(f"Unknown strategy: {strategy_name}")
                 

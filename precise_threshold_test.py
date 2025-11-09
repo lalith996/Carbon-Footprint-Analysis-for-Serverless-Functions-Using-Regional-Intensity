@@ -27,8 +27,6 @@ import time
 # Import project modules
 from scheduler_embodied_aware import (
     choose_region_embodied_aware,
-    choose_region_operational_only,
-    calculate_total_carbon,
     calculate_power_consumption,
     SERVER_SPECS,
     BASE_POWER_W,

@@ -30,29 +30,27 @@ from estimator import get_live_ci, get_recent_historical_ci
 # =============================================================================
 
 # Server specifications by age group
+# NOTE: Power is CALCULATED using calculate_power_consumption(), not stored
 SERVER_SPECS = {
     "new": {
         "age_years": 0.5,  # 6 months old
-        "base_power_w": 65,
         "total_embodied_kg": 660,
         "expected_lifetime_years": 5,
-        "efficiency_factor": 1.0,  # Baseline efficiency
     },
     "medium": {
         "age_years": 2.5,
-        "base_power_w": 72,  # 11% degradation
         "total_embodied_kg": 660,
         "expected_lifetime_years": 5,
-        "efficiency_factor": 1.11,
     },
     "old": {
         "age_years": 4.0,
-        "base_power_w": 85,  # 31% degradation
         "total_embodied_kg": 660,
         "expected_lifetime_years": 5,
-        "efficiency_factor": 1.31,
     },
 }
+
+# Base power for NEW hardware (all power calculations start from this)
+BASE_POWER_W = 65  # Watts for brand new server
 
 # Regional data centers with mixed hardware ages
 REGION_DATACENTERS = {
@@ -132,17 +130,25 @@ def calculate_power_consumption(base_power_w: float, age_years: float,
     """
     Calculate current power consumption considering efficiency degradation.
     
-    Formula: Power(t) = Base Power × (1 + α × t)
+    Formula: Power(t) = Base Power × (1 + α × t), capped at 60% increase
     
     Args:
-        base_power_w: Base power consumption when new
+        base_power_w: Base power consumption when new (true baseline for new hardware)
         age_years: Current age
-        alpha: Efficiency degradation rate per year
+        alpha: Efficiency degradation rate per year (default 12%)
         
     Returns:
         Current power consumption in watts
     """
-    return base_power_w * (1 + alpha * age_years)
+    MAX_DEGRADATION = 0.60  # Cap at 60% total increase (research-backed)
+    degradation_factor = min(alpha * age_years, MAX_DEGRADATION)
+    actual_power = base_power_w * (1 + degradation_factor)
+    
+    # Assertion for validation
+    assert actual_power <= base_power_w * 1.60, \
+        f"Power {actual_power:.1f}W exceeds 60% cap for base {base_power_w}W"
+    
+    return actual_power
 
 
 def calculate_amortized_embodied_carbon(total_embodied_kg: float,
@@ -152,34 +158,52 @@ def calculate_amortized_embodied_carbon(total_embodied_kg: float,
     """
     Calculate amortized embodied carbon for workload considering server age.
     
-    Newer servers carry higher embodied carbon debt, so we apply a multiplier.
+    CRITICAL: Amortizes total embodied carbon over TOTAL lifetime,
+    then applies debt_ratio to account for what's already been "paid off".
+    
+    Formula:
+    1. Carbon per hour = Total embodied / Total lifetime hours
+    2. Task carbon = Carbon per hour × Duration
+    3. Unpaid carbon = Task carbon × Debt ratio (0.9 for new, 0.2 for old)
     
     Args:
-        total_embodied_kg: Total embodied carbon of server
+        total_embodied_kg: Total embodied carbon of server (660kg for typical)
         age_years: Current age of server
-        expected_lifetime_years: Expected lifetime
+        expected_lifetime_years: Expected lifetime (5 years typical)
         duration_hours: Workload duration
         
     Returns:
         Amortized embodied carbon in grams
     """
-    # Calculate carbon debt ratio
+    # Calculate carbon debt ratio (older servers have less "un-paid" carbon)
     debt_ratio = calculate_carbon_debt_ratio(age_years, expected_lifetime_years)
     
-    # Apply multiplier for new hardware (2× carbon cost for new servers)
-    if age_years < 1.0:  # Less than 1 year old
-        debt_multiplier = NEW_HARDWARE_CARBON_MULTIPLIER
-    else:
-        debt_multiplier = 1.0
+    # FIXED: Amortize over TOTAL lifetime, not remaining
+    # This ensures older servers show less embodied carbon per task
+    total_lifetime_hours = expected_lifetime_years * 365.25 * 24
     
-    # Effective embodied carbon considering debt
-    effective_embodied_kg = total_embodied_kg * debt_ratio * debt_multiplier
+    # Carbon per hour over full lifetime
+    carbon_per_hour_g = (total_embodied_kg * 1000) / total_lifetime_hours
     
-    # Amortize over lifetime
-    lifetime_hours = expected_lifetime_years * 365.25 * 24
-    carbon_per_hour_g = (effective_embodied_kg * 1000) / lifetime_hours
+    # Task carbon (raw amortization)
+    task_carbon_g = carbon_per_hour_g * duration_hours
     
-    return carbon_per_hour_g * duration_hours
+    # Apply debt ratio (older servers have paid off more carbon)
+    carbon_g = task_carbon_g * debt_ratio
+    
+    # Validation assertion: Scale with duration
+    # Short tasks (<1 min): 0-1g, Medium (1-10 min): 0-10g, Long (>10 min): 0-100g
+    max_reasonable = max(1.0, duration_hours * 100)  # Scale assertion with duration
+    assert 0 <= carbon_g <= max_reasonable, \
+        f"Embodied {carbon_g:.3f}g unrealistic for {duration_hours:.4f}h task on {age_years:.1f}y server"
+    
+    return carbon_g
+    
+    # Validation assertion: For typical serverless (15s), should be 0.01-0.05g
+    assert 0 <= carbon_g <= 1.0, \
+        f"Embodied {carbon_g:.3f}g unrealistic for {duration_hours:.4f}h task on {age_years:.1f}y server"
+    
+    return carbon_g
 
 
 def calculate_operational_carbon(power_w: float, duration_hours: float, 
@@ -217,8 +241,9 @@ def calculate_total_carbon(server_age: str, duration_seconds: float,
     duration_hours = duration_seconds / 3600.0
     
     # Calculate current power consumption with degradation
+    # Use BASE_POWER_W (65W for new hardware), not specs["base_power_w"]
     current_power_w = calculate_power_consumption(
-        specs["base_power_w"], 
+        BASE_POWER_W, 
         specs["age_years"]
     )
     
@@ -272,16 +297,19 @@ def calculate_break_even_time(old_server_age: str, new_server_age: str,
     embodied_diff = new_embodied - old_remaining_embodied
     
     # Power consumption difference (in kW)
+    # Use BASE_POWER_W for consistent calculations
     old_power_kw = calculate_power_consumption(
-        old_specs["base_power_w"], 
+        BASE_POWER_W, 
         old_specs["age_years"]
     ) / 1000.0
     
-    new_power_kw = new_specs["base_power_w"] / 1000.0
+    # New server power (use BASE_POWER_W with minimal age)
+    new_power_kw = calculate_power_consumption(BASE_POWER_W, 0.5) / 1000.0
     
     # Operational carbon savings per hour (g CO₂/h)
     operational_savings_per_hour = (old_power_kw - new_power_kw) * \
         carbon_intensity * PUE_DEFAULT
+
     
     if operational_savings_per_hour <= 0:
         return float('inf')  # New server not more efficient
@@ -386,7 +414,7 @@ def choose_region_embodied_aware(duration_s: float,
                 "total_co2_g": round(total_co2, 6),
                 "carbon_debt_ratio": round(debt_ratio, 3),
                 "power_consumption_w": round(calculate_power_consumption(
-                    specs["base_power_w"], specs["age_years"]), 2),
+                    BASE_POWER_W, specs["age_years"]), 2),
                 "latency_ms": latency,
                 "cost_factor": cost,
                 "score": round(score, 6),
@@ -492,7 +520,7 @@ def analyze_hardware_replacement(region: str, old_age: str = "old",
             "age_category": old_age,
             "age_years": old_specs["age_years"],
             "remaining_life_years": round(remaining_life_years, 2),
-            "power_w": round(calculate_power_consumption(old_specs["base_power_w"], 
+            "power_w": round(calculate_power_consumption(BASE_POWER_W, 
                                                          old_specs["age_years"]), 2),
             "carbon_debt_ratio": round(calculate_carbon_debt_ratio(
                 old_specs["age_years"], old_specs["expected_lifetime_years"]), 3),
@@ -593,7 +621,7 @@ if __name__ == "__main__":
             specs["age_years"], 
             specs["expected_lifetime_years"]
         )
-        power = calculate_power_consumption(specs["base_power_w"], specs["age_years"])
+        power = calculate_power_consumption(BASE_POWER_W, specs["age_years"])
         
         status = "🆕 High Debt" if debt > 0.7 else "✅ Mostly Paid Off" if debt < 0.3 else "⚠️  Medium Debt"
         

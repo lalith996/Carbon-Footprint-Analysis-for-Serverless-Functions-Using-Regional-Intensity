@@ -30,9 +30,11 @@ from scheduler_embodied_aware import (
     calculate_power_consumption,
     SERVER_SPECS,
     BASE_POWER_W,
-    PUE,
-    EMBODIED_CARBON_KG
+    PUE_DEFAULT as PUE
 )
+
+# Embodied carbon constant (not exported from scheduler)
+EMBODIED_CARBON_KG = 660  # kg CO2e per server
 
 # Configure plotting
 sns.set_style("whitegrid")

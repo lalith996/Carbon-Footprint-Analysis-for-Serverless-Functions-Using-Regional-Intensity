@@ -1,0 +1,6 @@
+timestamp,region,instance_type,workload_scale,duration_s,cpu_time_s,cpu_percent_avg,cpu_percent_max,cpu_count,memory_used_gb_avg,memory_percent_avg,memory_percent_max,memory_delta_mb,gpu_available,gpu_count,gpu_utilization,gpu_memory_used_gb,energy_kwh,operational_co2_g,embodied_co2_g,total_co2_g,operational_percent,embodied_percent,ram_gb,storage_gb,total_embodied_carbon_kg,telemetry_samples
+2025-11-09T12:39:06.872998,Northern,cloud_medium,400000,0.1434,0.0384,0.0,0.0,4,5.85,77.0,77.8,0.02,False,0,,,2.59e-06,0.001626,0.000466,0.002092,77.72,22.28,16,200,512.0,2
+2025-11-09T12:41:10.307172,Northern,local_machine,200000,0.125,0.0225,5.35,6.7,10,5.82,76.2,76.2,0.02,False,0,,,2.26e-06,0.001418,0.000531,0.001949,72.76,27.24,16,500,660.0,2
+2025-11-09T12:41:20.831098,Western,local_machine,400000,0.1428,0.0379,4.35,8.7,10,5.82,76.2,76.2,0.0,False,0,,,2.58e-06,0.002072,0.000598,0.00267,77.6,22.4,16,500,660.0,2
+2025-11-09T12:41:21.841058,Southern,local_machine,800000,0.1746,0.0696,10.05,10.9,10,5.8,76.15,76.2,0.03,False,0,,,3.15e-06,0.002059,0.000731,0.00279,73.8,26.2,16,500,660.0,2
+2025-11-09T12:41:22.722739,Eastern,local_machine,800000,0.1653,0.063,24.55,24.8,10,5.85,76.4,77.0,0.0,False,0,,,2.98e-06,0.002205,0.000703,0.002908,75.83,24.17,16,500,660.0,2

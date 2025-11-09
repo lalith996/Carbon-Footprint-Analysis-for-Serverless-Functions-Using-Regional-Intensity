@@ -1,0 +1,32 @@
+======================================================================
+REGIONAL PERFORMANCE MATRIX - ANALYSIS SUMMARY
+======================================================================
+
+Experiment: EXP-002
+Date: 2025-11-09 22:15:32
+Duration: 0.0s
+
+----------------------------------------------------------------------
+REGIONAL PERFORMANCE
+----------------------------------------------------------------------
+
+Eastern (CI = 813 gCO₂/kWh):
+  operational_only      :  323.08g ( +0.00%) 
+  embodied_prioritized  :  387.46g (+19.92%) ***
+  balanced              :  359.87g (+11.39%) ***
+
+Northern (CI = 535 gCO₂/kWh):
+  operational_only      :  231.14g ( +0.00%) 
+  embodied_prioritized  :  259.09g (+12.09%) ***
+  balanced              :  247.11g ( +6.91%) ***
+
+Southern (CI = 607 gCO₂/kWh):
+  operational_only      :  254.96g ( +0.00%) 
+  embodied_prioritized  :  292.33g (+14.66%) ***
+  balanced              :  276.32g ( +8.38%) ***
+
+Western (CI = 712 gCO₂/kWh):
+  operational_only      :  289.68g ( +0.00%) 
+  embodied_prioritized  :  340.82g (+17.65%) ***
+  balanced              :  318.90g (+10.09%) ***
+

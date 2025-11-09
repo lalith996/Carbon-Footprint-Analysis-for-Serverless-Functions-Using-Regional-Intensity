@@ -1,0 +1,5 @@
+region,ci_gco2_kwh,recommended_strategy,carbon_g,baseline_carbon_g,savings_g,savings_pct
+Eastern,813,operational_only,323.08480558521563,323.08480558521563,0.0,0.0
+Northern,535,operational_only,231.14464558521559,231.14464558521559,0.0,0.0
+Southern,607,operational_only,254.95648558521555,254.95648558521555,0.0,0.0
+Western,712,operational_only,289.68208558521565,289.68208558521565,0.0,0.0

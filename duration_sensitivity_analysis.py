@@ -9,7 +9,8 @@ crossover point where embodied-aware strategies become beneficial.
 Research Question: At what task duration does considering embodied carbon
 result in lower total emissions than operational-only strategies?
 
-Test durations: 5s, 15s, 30s, 60s, 300s (5min), 600s (10min), 1800s (30min), 3600s (1hr)
+Default test durations: 5s, 15s, 30s, 60s, 300s (5min), 600s (10min), 1800s (30min), 3600s (1hr)
+Extended test: 14400s (4hr), 28800s (8hr), 86400s (24hr)
 
 Author: Carbon Scheduling Research Team
 Date: 2024-11-09
@@ -21,6 +22,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import argparse
 from pathlib import Path
 from typing import Dict, List, Tuple
 from datetime import datetime
@@ -41,12 +43,17 @@ plt.rcParams['figure.figsize'] = (14, 10)
 class DurationSensitivityAnalyzer:
     """Analyze carbon emissions across different task durations."""
     
-    def __init__(self, output_dir: str = "duration_sensitivity_results"):
+    def __init__(self, output_dir: str = "duration_sensitivity_results", 
+                 durations: List[int] = None):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
         
-        # Test durations (in seconds)
-        self.durations = [5, 15, 30, 60, 300, 600, 1800, 3600]
+        # Test durations (in seconds) - allow custom durations
+        if durations:
+            self.durations = sorted(durations)
+        else:
+            # Default durations
+            self.durations = [5, 15, 30, 60, 300, 600, 1800, 3600]
         
         # Strategies to compare
         self.strategies = [
@@ -56,6 +63,17 @@ class DurationSensitivityAnalyzer:
         ]
         
         self.results = []
+        
+    def _format_duration(self, duration_s: int) -> str:
+        """Format duration in human-readable format."""
+        if duration_s < 60:
+            return f"{duration_s}s"
+        elif duration_s < 3600:
+            return f"{duration_s/60:.1f}min"
+        elif duration_s < 86400:
+            return f"{duration_s/3600:.1f}hr"
+        else:
+            return f"{duration_s/86400:.1f}days"
         
     def run_analysis(self, num_samples_per_duration: int = 10):
         """
@@ -78,7 +96,8 @@ class DurationSensitivityAnalyzer:
         
         for duration_s in self.durations:
             print(f"\n{'='*80}")
-            print(f"Testing duration: {duration_s}s ({duration_s/60:.1f} min)")
+            duration_label = self._format_duration(duration_s)
+            print(f"Testing duration: {duration_s}s ({duration_label})")
             print(f"{'='*80}")
             
             for strategy in self.strategies:
@@ -267,7 +286,9 @@ class DurationSensitivityAnalyzer:
         
         # Plot 4: Operational vs Embodied breakdown
         ax4 = fig.add_subplot(gs[2, 0])
-        durations_subset = [15, 60, 300, 1800]  # Select key durations
+        
+        # Use actual durations from results, pick representative ones
+        durations_subset = self.durations[:min(4, len(self.durations))]  # Up to 4 durations
         strategies_subset = ["operational_only", "embodied_prioritized"]
         
         x = np.arange(len(durations_subset))
@@ -275,10 +296,16 @@ class DurationSensitivityAnalyzer:
         
         for i, strategy in enumerate(strategies_subset):
             strategy_df = df[df["strategy"] == strategy]
-            op_vals = [strategy_df[strategy_df["duration_s"] == d]["operational_g"].values[0] 
-                      for d in durations_subset]
-            emb_vals = [strategy_df[strategy_df["duration_s"] == d]["embodied_g"].values[0] 
-                       for d in durations_subset]
+            op_vals = []
+            emb_vals = []
+            for d in durations_subset:
+                d_data = strategy_df[strategy_df["duration_s"] == d]
+                if not d_data.empty:
+                    op_vals.append(d_data["operational_g"].values[0])
+                    emb_vals.append(d_data["embodied_g"].values[0])
+                else:
+                    op_vals.append(0)
+                    emb_vals.append(0)
             
             offset = width * (i - 0.5)
             ax4.bar(x + offset, op_vals, width*0.9, label=f'{strategy} (operational)', alpha=0.8)
@@ -289,7 +316,7 @@ class DurationSensitivityAnalyzer:
         ax4.set_ylabel("CO₂ Emissions (g)", fontsize=11, fontweight='bold')
         ax4.set_title("Operational vs Embodied Carbon Breakdown", fontsize=12, fontweight='bold')
         ax4.set_xticks(x)
-        ax4.set_xticklabels([f'{d}s\n({d/60:.0f}m)' for d in durations_subset])
+        ax4.set_xticklabels([self._format_duration(d) for d in durations_subset])
         ax4.legend(fontsize=9, loc='upper left')
         ax4.grid(alpha=0.3, axis='y')
         
@@ -315,7 +342,7 @@ class DurationSensitivityAnalyzer:
         ax5.set_ylabel("Carbon Difference (g)", fontsize=11, fontweight='bold')
         ax5.set_title("Embodied-Prioritized vs Baseline (Absolute)", fontsize=12, fontweight='bold')
         ax5.set_xticks(range(len(self.durations)))
-        ax5.set_xticklabels([f'{d}s' for d in self.durations], rotation=45)
+        ax5.set_xticklabels([self._format_duration(d) for d in self.durations], rotation=45)
         ax5.grid(alpha=0.3, axis='y')
         
         # Add value labels on bars
@@ -471,6 +498,40 @@ class DurationSensitivityAnalyzer:
 
 def main():
     """Run duration sensitivity analysis."""
+    parser = argparse.ArgumentParser(
+        description='Duration Sensitivity Analysis for Carbon-Aware Scheduling',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Default durations (5s to 1hr)
+  python duration_sensitivity_analysis.py
+  
+  # Test longer durations (4hr, 8hr, 24hr)
+  python duration_sensitivity_analysis.py --durations 14400,28800,86400 --samples 5
+  
+  # Test specific durations
+  python duration_sensitivity_analysis.py --durations 60,300,3600,14400 --output longer_test
+        """
+    )
+    parser.add_argument('--durations', type=str, 
+                       help='Comma-separated list of durations in seconds (e.g., 60,300,3600)')
+    parser.add_argument('--samples', type=int, default=10,
+                       help='Number of samples per duration (default: 10)')
+    parser.add_argument('--output', type=str, default='duration_sensitivity_results',
+                       help='Output directory (default: duration_sensitivity_results)')
+    
+    args = parser.parse_args()
+    
+    # Parse custom durations if provided
+    custom_durations = None
+    if args.durations:
+        try:
+            custom_durations = [int(d.strip()) for d in args.durations.split(',')]
+            print(f"\n✅ Custom durations: {custom_durations}")
+        except ValueError as e:
+            print(f"❌ Error parsing durations: {e}")
+            sys.exit(1)
+    
     print("\n" + "="*80)
     print("  DURATION SENSITIVITY ANALYSIS FOR CARBON-AWARE SCHEDULING")
     print("="*80)
@@ -479,11 +540,11 @@ def main():
     print("")
     
     # Create analyzer
-    analyzer = DurationSensitivityAnalyzer()
+    analyzer = DurationSensitivityAnalyzer(output_dir=args.output, durations=custom_durations)
     
-    # Run analysis (10 samples per duration for statistical robustness)
+    # Run analysis
     start_time = time.time()
-    analyzer.run_analysis(num_samples_per_duration=10)
+    analyzer.run_analysis(num_samples_per_duration=args.samples)
     elapsed = time.time() - start_time
     
     print(f"\n⏱️  Analysis completed in {elapsed:.1f} seconds")

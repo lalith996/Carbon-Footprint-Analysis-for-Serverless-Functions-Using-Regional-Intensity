@@ -1,0 +1,48 @@
+======================================================================
+HARDWARE AGE SENSITIVITY - ANALYSIS SUMMARY
+======================================================================
+
+Experiment: EXP-004
+Date: 2025-11-09 22:21:52
+Duration: 0.1s
+
+----------------------------------------------------------------------
+AGING RATE THRESHOLDS
+----------------------------------------------------------------------
+
+embodied_prioritized:
+  Empirical threshold: 7.2%/year
+  Expected threshold: 7.0%/year
+  Difference: 0.2%/year
+  Relative error: 3.2%
+
+balanced:
+  Empirical threshold: 7.2%/year
+  Expected threshold: 7.0%/year
+  Difference: 0.2%/year
+  Relative error: 3.2%
+
+----------------------------------------------------------------------
+PERFORMANCE BY AGING RATE
+----------------------------------------------------------------------
+
+
+embodied_prioritized:
+    5%/yr:  -5.75% *** (EMBODIED)
+    8%/yr:  +2.01% *** (OPERATIONAL)
+   10%/yr:  +7.09% *** (OPERATIONAL)
+   12%/yr: +12.09% *** (OPERATIONAL)
+   15%/yr: +19.46% *** (OPERATIONAL)
+   20%/yr: +17.36% *** (OPERATIONAL)
+   25%/yr: +15.34% *** (OPERATIONAL)
+   30%/yr: +13.39% *** (OPERATIONAL)
+
+balanced:
+    5%/yr:  -3.28% *** (EMBODIED)
+    8%/yr:  +1.15% *** (OPERATIONAL)
+   10%/yr:  +4.05% *** (OPERATIONAL)
+   12%/yr:  +6.91% *** (OPERATIONAL)
+   15%/yr: +11.12% *** (OPERATIONAL)
+   20%/yr: +17.94% *** (OPERATIONAL)
+   25%/yr: +22.81% *** (OPERATIONAL)
+   30%/yr: +20.73% *** (OPERATIONAL)

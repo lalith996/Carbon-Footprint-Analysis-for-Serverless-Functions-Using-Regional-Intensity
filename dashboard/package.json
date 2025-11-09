@@ -1,0 +1,38 @@
+{
+  "name": "greenai-dashboard",
+  "version": "1.0.0",
+  "description": "GreenAI Carbon-Aware Serverless Scheduling Dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "concurrently \"nodemon server.js\" \"npm run client\"",
+    "client": "cd client && npm start",
+    "install-client": "cd client && npm install",
+    "build": "cd client && npm run build",
+    "heroku-postbuild": "npm run install-client && npm run build"
+  },
+  "keywords": [
+    "carbon",
+    "serverless",
+    "sustainability",
+    "green-computing"
+  ],
+  "author": "GreenAI Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^8.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "csv-parser": "^3.0.0",
+    "fs-extra": "^11.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

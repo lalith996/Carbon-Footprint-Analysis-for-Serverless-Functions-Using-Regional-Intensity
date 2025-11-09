@@ -76,3 +76,17 @@ htmlcov/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# Debug and test scripts (keep validated framework only)
+debug_*.py
+verify_*.py
+test_*.py
+*_test.py
+
+# Analysis scripts (keep only essential ones)
+analyze_and_plot.py
+analyze_embodied_carbon.py
+analyze_embodied_aware_experiments.py
+
+# Temporary validation results
+validation_results.csv

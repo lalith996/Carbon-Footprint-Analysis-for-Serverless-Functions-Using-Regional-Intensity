@@ -1,0 +1,41 @@
+======================================================================
+EMBODIED CARBON-AWARE SCHEDULING - EXPERIMENT SUMMARY
+======================================================================
+
+OVERALL STATISTICS
+----------------------------------------------------------------------
+Total experiments: 27
+Strategies tested: 3
+Workload scales: [np.int64(200000), np.int64(400000), np.int64(800000)]
+Regions covered: ['Eastern']
+
+STRATEGY PERFORMANCE
+----------------------------------------------------------------------
+
+EMBODIED_PRIORITIZED:
+  Total CO₂: 0.248779 ± 0.141045 g
+  Avg Server Age: 4.00 years
+  Avg Carbon Debt: 20.00%
+  Carbon Savings: -23.01% vs baseline
+
+BALANCED:
+  Total CO₂: 0.198812 ± 0.112716 g
+  Avg Server Age: 2.50 years
+  Avg Carbon Debt: 50.00%
+  Carbon Savings: +1.70% vs baseline
+
+OPERATIONAL_ONLY:
+  Total CO₂: 0.202250 ± 0.114665 g
+  Avg Server Age: 0.50 years
+  Avg Carbon Debt: 90.00%
+  Carbon Savings: +0.00% vs baseline
+
+======================================================================
+KEY INSIGHTS
+======================================================================
+
+1. Embodied-prioritized strategy achieves -23.01% carbon reduction
+2. Balanced strategy provides middle ground with 1.70% savings
+3. Embodied-prioritized uses old servers 100.0% of the time
+4. Embodied carbon represents 15.0% of total emissions
+5. Traditional approach (operational_only) ignores 15.0% of carbon impact
